@@ -1,0 +1,7 @@
+matplotlib==3.3.1
+plotly==4.14.3
+streamlit==0.82.0
+pandas==1.1.4
+spotipy==2.18.0
+numpy==1.19.4
+data_collector==0.0.1
