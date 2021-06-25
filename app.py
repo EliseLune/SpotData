@@ -118,7 +118,7 @@ def apres_auth():
         st.write('  - Titre le plus écouté : {}'.format(top_tracks["items"][0]["name"]))
     
     #Analyse rapide de l'ensemble de la musique
-    st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
+    # st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
 
     # Bubble chart des artistes
     tutu = getTrackIDs('4pUzBoCxZzig6QncK4fcxD',sp)
@@ -137,7 +137,6 @@ def analyse():
     st.header('Analyse de vos playlists')
     
     crtPlaylist=st.selectbox('Vos playlists: ',name_playlists)
-    # crtPlaylist=st.selectbox('Vos playlists: ',['Select']+name_playlists)
     crtId = name_to_id(name_playlists, id_playlists, crtPlaylist)
     dataPL = creat_df_audiofeatures(crtId, sp)
     tabAF = create_work()
@@ -272,10 +271,6 @@ def glossaire():
     st.title('SpotData')
     st.header('Glossaire')
     st.write('Vous trouverez sur cette page une définition des différents audiofeatures, donnée par la documentation de Spotify. La plupart de ces indices sont mesurés entre 0 et 1.')
-    gloss={'Audio-features (Traduction? Caractéristique/Paramètre':['Danceability','Speachiness','...'],
-            'Description':['Description compréhensible de Danceability','Description compréhensible de Speechiness','...'],
-            'Intervalle':['[0,1] : De Podcast à Musique Club','[0,1]: De Techno à Gospel','...'],}
-    pd_gloss=pd.DataFrame(gloss)
 
     st.markdown("___Acousticness___")
     st.write("L'acousticness mesure l'acoustique du morceau. Plus il est proche de 1, plus il y a de chance que le morceau soit acoustique (avec des instruments non synthétiques).")
@@ -310,7 +305,7 @@ def apropos():
     st.header('A propos')
     st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines Paristech (J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé) dans le cadre d\'un projet d\'informatique.')
     st.write("Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy. Cette application est développée avec Streamlit.")
-    st.write('[Dépot Github du projet](https://github.com/EliseLune/Analyse_Spotify)')
+    st.write('[Dépot Github du projet](https://github.com/EliseLune/SpotData)')
     st.write('[Site des Mines](https://www.minesparis.psl.eu/)')
     return None
 app = MultiApp()
