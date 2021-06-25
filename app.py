@@ -303,7 +303,7 @@ def glossaire():
 def apropos():
     st.title('SpotData')
     st.header('A propos')
-    st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines Paristech (J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé) dans le cadre d\'un projet d\'informatique.')
+    st.write('SpotData est une WebApp développée par 4 élèves de l\'école Mines ParisTech (J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé) dans le cadre d\'un projet d\'informatique.')
     st.write("Le but est d\'analyser des playlists Spotify et de proposer des recommandations grâce au module python Spotipy. Cette application est développée avec Streamlit.")
     st.write('[Dépot Github du projet](https://github.com/EliseLune/SpotData)')
     st.write('[Site des Mines](https://www.minesparis.psl.eu/)')
