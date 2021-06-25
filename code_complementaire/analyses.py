@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import streamlit as st
 
@@ -68,15 +69,14 @@ def gen_wind_rose(tabTags):
                     theta='name',
                     r='average',
                     range_r = [0,1],
-                    line_close=True,
-                    template = 'plotly_dark'
+                    line_close=True
                     )
     fig.update_layout(
         title = "Graphe général des audio-features"
     )
     fig.update_traces(
         fill = 'toself',
-        line_color = '#F63366'
+        line_color = '#1DB954'
     )
     st.plotly_chart(fig)
 
@@ -90,21 +90,17 @@ def gen_hists(dataPL,liste_feat, tabTags):
             fig.update_layout(
                 title="Années de sortie",
                 xaxis_title = "Années de sortie",
-                yaxis_title = "Nombre de piste /période de temps",
+                yaxis_title = "Nombre de pistes /période de temps",
                 bargap = 0.1
             )
             st.plotly_chart(fig)
         else:
-            # if aud_feat=='popularity':
-            #     binsize, eten = 10, [0,100]
-            # else :
-            #     binsize, eten = 0.75, [0,1.]
-            # fig = ff.create_distplot([dataPL[aud_feat]], [aud_feat], bin_size=binsize, show_rug=False)
-            # fig.update_xaxes(range=eten)
             aud_feat = item.lower()
             fig = px.histogram(dataPL, x=[aud_feat],
-                barmode='overlay',
-                opacity=0.5)
+                opacity=0.5,
+                nbins = 10,
+                range_x = [0,100] if aud_feat=='popularity' else [0,1]
+            )
             fig.update_layout(
                 title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag'],
                 xaxis_title = tabTags.loc[aud_feat, 'name'],
