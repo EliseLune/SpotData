@@ -64,47 +64,83 @@ def gen_tags(audio_feat, playlist):
         playlist2.loc[aud, 'st dev'] = playlist[aud].std()
     return playlist2
 
+@st.cache
 def gen_wind_rose(tabTags):
     fig = px.line_polar(tabTags[tabTags['to analyse']].loc['acousticness':'valence'],
                     theta='name',
                     r='average',
                     range_r = [0,1],
-                    line_close=True
+                    line_close=True,
+                    line_shape='spline'
                     )
     fig.update_layout(
-        title = "Graphe général des audio-features"
+        title = "Graphe général des audio-features",
+        polar = dict(
+            bgcolor = '#191414',
+            radialaxis = dict(
+                tickfont_color = '#a0d6b4',
+                linecolor = '#a3c1ad',
+                gridcolor = '#a3c1ad'
+            ),
+            angularaxis = dict(
+                linecolor = '#a3c1ad',
+                gridcolor = '#a3c1ad'
+            )
+        )
     )
     fig.update_traces(
         fill = 'toself',
         line_color = '#1DB954'
     )
-    st.plotly_chart(fig)
+    return fig
 
+@st.cache
+def gen_one_hist(dataPL, tabTags, aud_feat, color):
+    if aud_feat=='années de sortie':
+        fig = px.histogram(dataPL, x='release_date')
+        fig.update_layout(
+            title="Années de sortie",
+            xaxis_title = "Années de sortie",
+            yaxis_title = "Nombre de pistes /période de temps"
+        )
+    else:
+        fig = px.histogram(dataPL, x=[aud_feat],
+            nbins = 10,
+            range_x = [0,100] if aud_feat=='popularity' else [0,1]
+        )
+        fig.update_layout(
+            title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag'],
+            xaxis_title = tabTags.loc[aud_feat, 'name'],
+            yaxis_title = 'Nombre de pistes'
+        )
+    fig.update_layout(
+        bargap = 0.1,
+        showlegend = False,
+        yaxis = dict(
+            gridcolor = '#65737e'
+        ),
+        # colorway = [color]
+    )
+    fig.update_traces(
+        marker = dict(
+            color = color
+        ),
+        opacity = 0.7
+    )
+    return fig
 
-def gen_hists(dataPL,liste_feat, tabTags):
+@st.cache
+def gen_hists(dataPL, tabTags, liste_feat):
+    colors = ['#d62976', '#962fbf', '#4f5bd5', '#feda75', '#fa7e1e']
+    list_figs = []
+    i_color = 0
     for item in liste_feat:
-        #On peut faire une boucle for pour afficher les graphs de tous les audiofeatures sélectionnés
-        #Et faire des if pour afficher un type de graph différent selon l'audiofeature?
-        if item=='Années de sortie':
-            fig = px.histogram(dataPL, x='release_date')
-            fig.update_layout(
-                title="Années de sortie",
-                xaxis_title = "Années de sortie",
-                yaxis_title = "Nombre de pistes /période de temps",
-                bargap = 0.1
-            )
-            st.plotly_chart(fig)
-        else:
-            aud_feat = item.lower()
-            fig = px.histogram(dataPL, x=[aud_feat],
-                opacity=0.5,
-                nbins = 10,
-                range_x = [0,100] if aud_feat=='popularity' else [0,1]
-            )
-            fig.update_layout(
-                title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag'],
-                xaxis_title = tabTags.loc[aud_feat, 'name'],
-                yaxis_title = 'Nombre de pistes',
-                bargap = 0.1
-            )
-            st.plotly_chart(fig)
+        aud_feat = item.lower()
+        fig = gen_one_hist(dataPL, tabTags, aud_feat, colors[i_color])
+        list_figs.append(fig)
+        i_color = (i_color+1)%len(colors)
+    return list_figs
+
+def display_plotly(list_figs):
+    for fig in list_figs:
+        st.plotly_chart(fig)

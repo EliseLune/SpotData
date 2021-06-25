@@ -118,13 +118,13 @@ def analyse():
     
     tabAF = create_work()
     tabTags = gen_tags(tabAF, dataPL)
-    gen_wind_rose(tabTags)
+    display_plotly([gen_wind_rose(tabTags)])
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
-    a=st.multiselect('Audio-Features',['Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Années de sortie','Speechiness','Valence'])
+    a=st.multiselect('Audio-Features',['Années de sortie','Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Speechiness','Valence'])
     if crtPlaylist!='Select' and a!=[]:
         # test_plotly('df_example_01-Copy1.csv',a)
-        gen_hists(dataPL, a, tabTags)
+        display_plotly(gen_hists(dataPL, tabTags, a))
     
     return None
 
