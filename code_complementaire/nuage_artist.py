@@ -2,6 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 import pandas as pd
+from PIL import Image
+import requests
+# from StringIO import StringIO
+from imageio import imread
 
 def artist_dataframe(all_tracks,sp):
     df = pd.DataFrame(columns=['artist_id','name','number of tracks','image'])
@@ -73,8 +77,11 @@ class C():
         for i in range(self.N):
             # st.image(self.df['image'][i])
             # image = plt.imread(self.df['image'][i])
-            circ = plt.Circle(self.x[i,:2],self.x[i,2] )
+            circ = plt.Circle(self.x[i,:2],self.x[i,2], fill = False)
             ax.add_patch(circ)
+            label = ax.annotate("{}".format(self.df["name"][i]), xy=self.x[i,:2], ha="center")
+            image = np.asarray(imread(self.df["image"][i]))
+            st.image(image)
 
 def creat_chart(all_tracks,sp):
     # create 10 circles with different radii

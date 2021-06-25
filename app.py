@@ -40,34 +40,6 @@ def recup_noms_playlists_user(ident,secret,nombre):
             playlists = None
     return L
 
-#Test de laffichage dun graphique avec un playlist:
-def test_data(data_csv,liste_feat):
-    data=pd.read_csv(data_csv)
-    data["release_year"]=date_to_year(data['release_date'])
-    y = data['release_year'].value_counts()
-    for aud_feat in liste_feat:
-        #On peut faire une boucle for pour afficher les graphs de tous les audiofeatures sélectionnés
-        #Et faire des if pour afficher un type de graph différent selon l'audiofeature?
-        if aud_feat=='release_year':
-            fig2,ax2=plt.subplots()
-            ax2.bar(y.index,y)
-            ax2.set_title('Release date')
-            ax2.set_xlabel('Release date')
-            ax2.set_ylabel('Number of tracks')
-            st.pyplot(fig2)
-        else:
-            fig1,ax1=plt.subplots()
-            ax1.hist(data[aud_feat])
-            ax1.set_title(aud_feat)
-            ax1.set_xlabel(aud_feat)
-            ax1.set_ylabel('Number of tracks')
-            st.pyplot(fig1)
-    return None
-
-def date_to_year(date):
-    return int(date[:4])
-date_to_year = np.vectorize(date_to_year)
-
 def accueil():
     caching.clear_cache()
     st.title('SpotData')
@@ -140,19 +112,19 @@ def analyse():
     crtPlaylist=st.selectbox('Vos playlists: ',name_playlists)
     crtId = name_to_id(name_playlists, id_playlists, crtPlaylist)
     dataPL = creat_df_audiofeatures(crtId, sp)
-    tabAF = create_work()
-    tabTags = gen_tags(tabAF, dataPL)
     totTime = dataPL['length'].sum()//1000  # en secondes
     st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
     st.write('Durée de la playlist : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
     
-    gen_wind_rose(tabTags)
+    tabAF = create_work()
+    tabTags = gen_tags(tabAF, dataPL)
+    display_plotly([gen_wind_rose(tabTags)])
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
-    a=st.multiselect('Audio-Features',['Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Années de sortie','Speechiness','Valence'])
+    a=st.multiselect('Audio-Features',['Années de sortie','Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Speechiness','Valence'])
     if crtPlaylist!='Select' and a!=[]:
         # test_plotly('df_example_01-Copy1.csv',a)
-        gen_hists(dataPL, a, tabTags)
+        display_plotly(gen_hists(dataPL, tabTags, a))
     
     return None
 
@@ -262,5 +234,3 @@ app.add_app("Recommandations", recommandation)
 app.add_app("Glossaire",glossaire)
 app.add_app("A propos",apropos)
 app.run()
-
-
