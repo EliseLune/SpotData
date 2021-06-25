@@ -52,7 +52,7 @@ def tag(audio_feat, carac, moy):
 @st.cache
 def gen_tags(audio_feat, playlist):
     """Generate a dataframe specific to a playlist with tags and other statiscal information"""
-    playlist2 = audio_feat.loc[:, 'name':'description'].copy()
+    playlist2 = audio_feat.loc[:, ['name','description','to analyse']].copy()
     for aud in playlist2.index:
         playlist2.loc[aud, 'average'] = playlist[aud].mean()
         playlist2.loc[aud, 'tag'] = tag(audio_feat, aud, playlist2.loc[aud, 'average'])
@@ -62,8 +62,22 @@ def gen_tags(audio_feat, playlist):
         playlist2.loc[aud, 'st dev'] = playlist[aud].std()
     return playlist2
 
-# def gen_wind_rose(dtaPL):
-#     fig = px.bar_polar(dataPL, )
+def gen_wind_rose(tabTags):
+    fig = px.line_polar(tabTags[tabTags['to analyse']].loc['acousticness':'valence'],
+                    theta='name',
+                    r='average',
+                    range_r = [0,1],
+                    line_close=True,
+                    template = 'plotly_dark'
+                    )
+    fig.update_layout(
+        title = "Graphe général des audio-features"
+    )
+    fig.update_traces(
+        fill = 'toself',
+        line_color = '#F63366'
+    )
+    st.plotly_chart(fig)
 
 
 def gen_hists(dataPL,liste_feat, tabTags):

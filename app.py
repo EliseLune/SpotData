@@ -145,6 +145,7 @@ def analyse():
     st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
     st.write('Durée de la playlist : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
     
+    gen_wind_rose(tabTags)
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
     a=st.multiselect('Audio-Features',['Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Années de sortie','Speechiness','Valence'])
