@@ -148,12 +148,12 @@ def recommandation():
         #Choix du type de recommandation
         recommandation_type=st.selectbox('Quelle type de recommandation voulez-vous ?',['<select>',"Playlist soufflée", "Recommandation par années"])
         
-        #recommendation de playlist soufflée
+        #recommandation de playlist soufflée
         if recommandation_type=="Playlist soufflée":
             st.subheader('Playlist soufflée')
-            st.write("Pour chaque morceau de la playlist, ce type de recommendation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
+            st.write("Pour chaque morceau de la playlist, ce type de recommandation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
             st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelle playlist")
-            st.write("N'en choissiez pas trop, la recommendation serait bien plus compliquée !")
+            st.write("N'en choissiez pas trop, la recommandation serait bien plus compliquée !")
             audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','valence'])
             if audiofeatures_chosen!=[]: #Des audiofeatures ont été choisits
 
@@ -167,12 +167,12 @@ def recommandation():
                 ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
 
         elif recommandation_type=="Recommandation par années":
-            st.subheader('Recommendation par années')
+            st.subheader('Recommandation par années')
             st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
             st.subheader("Choississez une année cible")
             year = st.text_input('Année choisie', value="1970")
             st.subheader("Choississez un delta d'années")
-            st.write("Par exemple, si vous sélectionner 1970 précédement et 5 ici, nous vous recommenderons des titres entre 1965 et 1975.")
+            st.write("Par exemple, si vous sélectionner 1970 précédement et 5 ici, nous vous recommanderons des titres entre 1965 et 1975.")
             delta = st.slider ("Delta d'années", min_value=0, max_value=10,value=5,step = 1)
             nouvelle_playlist = recommendation_year(id_to_change,year,delta,sp)
             affichage_playlist_annees(nouvelle_playlist,sp)
@@ -180,8 +180,8 @@ def recommandation():
         
         else:
             st.subheader('Playlist soufflée')
-            st.write("Pour chaque morceau de la playlist, ce type de recommendation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
-            st.subheader('Recommendation par années')
+            st.write("Pour chaque morceau de la playlist, ce type de recommandation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
+            st.subheader('Recommandation par années')
             st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
     return None
 
