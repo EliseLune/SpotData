@@ -44,12 +44,12 @@ def accueil():
     caching.clear_cache()
     st.title('SpotData')
     st.write('Par J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé')
-    st.write('SpotData est une Webapp vous proposant de faire analyser vos playlists Spotify, et de découvrir encore plus de musiques qui vous correspondent.')
-    st.write("Vous allez être redirigé vers une page d'autentification. Une fois cette dernière finie, revenez sur cette page")
+    st.write('SpotData est une WebApp vous proposant de faire analyser vos playlists Spotify, et de découvrir encore plus de musiques qui vous correspondent.')
+    st.write("Vous allez être redirigé vers une page d'autentification. Une fois cette dernière finie, revenez sur cette page.")
     textPlaceholder = st.empty()
     click = textPlaceholder.button("Se connecter à Spotify")
     if click:
-        textPlaceholder.text("Vous êtes connecté. Vous pouvez allez naviguer sur le reste de l'application.")
+        textPlaceholder.text("Vous êtes connecté. Vous pouvez naviguer sur le reste de l'application.")
         sp = get_spotipy_ready()
         res = sp.current_user()
     return None
