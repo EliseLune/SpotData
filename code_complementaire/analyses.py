@@ -37,9 +37,12 @@ def create_work():
         ['Triste', 'Morose', 'Léger', 'Joyeux'],
         ['Peu connu', 'Relativement connu', 'Populaire']]
     anly = [True, True, True, True, False, True, False, False, True, False, True, False]
-    dict  = {'audio-features':feat, 'name':name, 'description':desc, 'intervals':inte, 'tags':tags, 'to analyse':anly}
-    audio_feat = pd.DataFrame(dict).set_index('audio-features')
-    return audio_feat
+    dictio = {'audio-features':feat, 'name':name, 'description':desc, 'intervals':inte, 'tags':tags, 'to analyse':anly}
+    audio_feat = pd.DataFrame(dictio)#.set_index('audio-features')
+    temp = audio_feat.loc[3].copy()
+    audio_feat.loc[3] = audio_feat.loc[10]
+    audio_feat.loc[10] = temp
+    return audio_feat.set_index('audio-features')
 
 def tag(audio_feat, carac, moy):
     """Returns the corresponding tag to the audio-features 'carac' based on their average
@@ -51,6 +54,14 @@ def tag(audio_feat, carac, moy):
         if moy < seuil :
             return audio_feat.loc[carac, "tags"][i-1]
 
+def f_resize(x):
+    # return 1-(1-x)**2
+    # return x**0.5
+    return (2.5 - (1.5-x)**2)**0.5 - 0.5
+
+# def f_resize_inv(x):
+#     return 1.5 - (2.5 - (-0.5-x)**2)**0.5
+
 @st.cache
 def gen_tags(audio_feat, playlist):
     """Generate a dataframe specific to a playlist with tags and other statiscal information"""
@@ -58,20 +69,23 @@ def gen_tags(audio_feat, playlist):
     for aud in playlist2.index:
         playlist2.loc[aud, 'average'] = playlist[aud].mean()
         playlist2.loc[aud, 'tag'] = tag(audio_feat, aud, playlist2.loc[aud, 'average'])
-        playlist2.loc[aud, 'min'] = playlist[aud].min()
-        playlist2.loc[aud, 'max'] = playlist[aud].max()
-        playlist2.loc[aud, 'median'] = playlist[aud].median()
+        # playlist2.loc[aud, 'min'] = playlist[aud].min()
+        # playlist2.loc[aud, 'max'] = playlist[aud].max()
+        # playlist2.loc[aud, 'median'] = playlist[aud].median()
+        playlist2.loc[aud, 'avg resized'] = f_resize(playlist2.loc[aud, 'average'])
         playlist2.loc[aud, 'st dev'] = playlist[aud].std()
     return playlist2
 
-@st.cache
+@st.cache#(suppress_st_warning=True)
 def gen_wind_rose(tabTags):
-    fig = px.line_polar(tabTags[tabTags['to analyse']].loc['acousticness':'valence'],
+    # text = tabTags[tabTags['to analyse']]['tag']
+    # st.write(tabTags)
+    ticks_vals = np.array([0, 0.2, 0.4, 0.7, 1])
+    fig = px.line_polar(tabTags,
                     theta='name',
-                    r='average',
-                    range_r = [0,1],
+                    r='avg resized',
                     line_close=True,
-                    line_shape='spline'
+                    line_shape='spline',
                     )
     fig.update_layout(
         title = "Graphe général des audio-features",
@@ -80,7 +94,10 @@ def gen_wind_rose(tabTags):
             radialaxis = dict(
                 tickfont_color = '#a0d6b4',
                 linecolor = '#a3c1ad',
-                gridcolor = '#a3c1ad'
+                gridcolor = '#a3c1ad',
+                tickvals = f_resize(ticks_vals),
+                ticktext = ticks_vals,
+                range = [0, 1]
             ),
             angularaxis = dict(
                 linecolor = '#a3c1ad',
@@ -90,14 +107,22 @@ def gen_wind_rose(tabTags):
     )
     fig.update_traces(
         fill = 'toself',
-        line_color = '#1DB954'
+        line_color = '#1DB954',
+        text=list(tabTags['average']) + [tabTags.iloc[0]['average']],
+        hovertext=list(tabTags['tag']) + [tabTags.iloc[0]['tag']],
+        hoveron = 'points',
+        hovertemplate = '%{hovertext}<br>%{text:.2f}',
     )
     return fig
 
 @st.cache
-def gen_one_hist(dataPL, tabTags, aud_feat, color):
+def gen_one_hist(dataPL, tabTags, AFname, color):
+    aud_feat = AFname.lower()
     if aud_feat=='années de sortie':
         fig = px.histogram(dataPL, x='release_date')
+        fig.update_traces(
+            hovertemplate = "<b>Années de sortie</b><br><i>Période</i> : %{x}<br><i>Nbr de pistes</i> : %{y}"
+        )
         fig.update_layout(
             title="Années de sortie",
             xaxis_title = "Années de sortie",
@@ -108,24 +133,26 @@ def gen_one_hist(dataPL, tabTags, aud_feat, color):
             nbins = 10,
             range_x = [0,100] if aud_feat=='popularity' else [0,1]
         )
+        fig.update_traces(
+            hovertemplate = "<b>"+AFname+"</b><br><i>Intervalle</i> : %{x}<br><i>Nbr de pistes</i> : %{y}<extra></extra>"
+        )
         fig.update_layout(
             title = tabTags.loc[aud_feat, 'name'] + " : " + tabTags.loc[aud_feat, 'tag'],
             xaxis_title = tabTags.loc[aud_feat, 'name'],
             yaxis_title = 'Nombre de pistes'
         )
+    fig.update_traces(
+        marker = dict(
+            color = color
+        ),
+        opacity = 0.7
+    )
     fig.update_layout(
         bargap = 0.1,
         showlegend = False,
         yaxis = dict(
             gridcolor = '#65737e'
         ),
-        # colorway = [color]
-    )
-    fig.update_traces(
-        marker = dict(
-            color = color
-        ),
-        opacity = 0.7
     )
     return fig
 
@@ -135,8 +162,7 @@ def gen_hists(dataPL, tabTags, liste_feat):
     list_figs = []
     i_color = 0
     for item in liste_feat:
-        aud_feat = item.lower()
-        fig = gen_one_hist(dataPL, tabTags, aud_feat, colors[i_color])
+        fig = gen_one_hist(dataPL, tabTags, item, colors[i_color])
         list_figs.append(fig)
         i_color = (i_color+1)%len(colors)
     return list_figs

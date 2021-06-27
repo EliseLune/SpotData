@@ -118,7 +118,7 @@ def analyse():
     
     tabAF = create_work()
     tabTags = gen_tags(tabAF, dataPL)
-    display_plotly([gen_wind_rose(tabTags)])
+    display_plotly([gen_wind_rose(tabTags[tabTags['to analyse']])])
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
     a=st.multiselect('Audio-Features',['Années de sortie','Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Speechiness','Valence'])
@@ -226,6 +226,7 @@ def apropos():
     st.write('[Dépot Github du projet](https://github.com/EliseLune/SpotData)')
     st.write('[Site des Mines](https://www.minesparis.psl.eu/)')
     return None
+
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
