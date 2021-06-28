@@ -62,7 +62,7 @@ def release_date_to_year(rd):
     return int(year)
 
 def affichage_playlist_annees(nouvelle_playlist,sp):
-    st.subheader('Voici les morceaux que vous nous recommendons.')
+    st.subheader('Voici les morceaux que nous vous recommandons.')
     names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
     df = {'Track':names,
                 'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],

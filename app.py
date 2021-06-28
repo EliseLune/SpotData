@@ -109,17 +109,23 @@ def analyse():
     st.title('SpotData')
     st.header('Analyse de vos playlists')
     
+    st.subheader("Quelle playlist souhaitez-vous faire analyser ?")
     crtPlaylist=st.selectbox('Vos playlists: ',name_playlists)
     crtId = name_to_id(name_playlists, id_playlists, crtPlaylist)
     dataPL = creat_df_audiofeatures(crtId, sp)
     totTime = dataPL['length'].sum()//1000  # en secondes
-    st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
-    st.write('Durée de la playlist : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    st.write('__Nombre de pistes__ : {}'.format(dataPL.shape[0]))
+    st.write('__Durée de la playlist__ : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    
+    # img = get_playlist_cover_image(crtId)
+    # st.write(img)
     
     tabAF = create_work()
     tabTags = gen_tags(tabAF, dataPL)
     display_plotly([gen_wind_rose(tabTags[tabTags['to analyse']])])
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
+    
+    # display_plotly([gen_corr_scatter(dataPL, tabTags[tabTags['to analyse']].index)])
     
     a=st.multiselect('Audio-Features',['Années de sortie','Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Speechiness','Valence'])
     if crtPlaylist!='Select' and a!=[]:
@@ -227,6 +233,7 @@ def apropos():
     st.write('[Site des Mines](https://www.minesparis.psl.eu/)')
     return None
 
+st.set_page_config(page_title='SpotData')
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
