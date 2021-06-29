@@ -25,49 +25,6 @@ def get_spotipy_ready():
     res=sp.current_user
     return sp
 
-def recup_noms_playlists_user(ident,secret,nombre):
-    client_credentials_manager = SpotifyClientCredentials(client_id=ident, client_secret=secret)
-    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-    playlists = sp.user_playlists(nombre)
-    L=[]
-    while playlists:
-        for i, playlist in enumerate(playlists['items']):
-            tab= playlist['uri'].split(':')
-            L.append(playlist['name'])
-        if playlists['next']:
-            playlists = sp.next(playlists)
-        else:
-            playlists = None
-    return L
-
-#Test de laffichage dun graphique avec un playlist:
-def test_data(data_csv,liste_feat):
-    data=pd.read_csv(data_csv)
-    data["release_year"]=date_to_year(data['release_date'])
-    y = data['release_year'].value_counts()
-    for aud_feat in liste_feat:
-        #On peut faire une boucle for pour afficher les graphs de tous les audiofeatures sélectionnés
-        #Et faire des if pour afficher un type de graph différent selon l'audiofeature?
-        if aud_feat=='release_year':
-            fig2,ax2=plt.subplots()
-            ax2.bar(y.index,y)
-            ax2.set_title('Release date')
-            ax2.set_xlabel('Release date')
-            ax2.set_ylabel('Number of tracks')
-            st.pyplot(fig2)
-        else:
-            fig1,ax1=plt.subplots()
-            ax1.hist(data[aud_feat])
-            ax1.set_title(aud_feat)
-            ax1.set_xlabel(aud_feat)
-            ax1.set_ylabel('Number of tracks')
-            st.pyplot(fig1)
-    return None
-
-def date_to_year(date):
-    return int(date[:4])
-date_to_year = np.vectorize(date_to_year)
-
 def accueil():
     caching.clear_cache()
     st.title('SpotData')
@@ -110,22 +67,15 @@ def apres_auth():
     st.write('  - Nombre de titres enregistrés : {}'.format(len(all_track)))
     st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
     
+    #Affichage des tops artistes
     top_artists = sp.current_user_top_artists(limit=5)
     if top_artists["total"]!=0: #On n'affiche pas les top artistes si l'utilisateur n'en a pas
         st.write('  - Artistes les plus écoutés : {}'.format(top_artist_to_string(top_artists)))
     
+    #Affichage du top track
     top_tracks = sp.current_user_top_tracks(limit=1)
     if top_tracks["total"]!=0:
         st.write('  - Titre le plus écouté : {}'.format(top_tracks["items"][0]["name"]))
-    
-    #Analyse rapide de l'ensemble de la musique
-    # st.write('Petit texte "Votre musique semble plutôt" [adjectif déterminé à partir de moyennes d\'audio-features]')
-
-    # Bubble chart des artistes
-    tutu = getTrackIDs('4pUzBoCxZzig6QncK4fcxD',sp)
-    df = creat_chart(tutu,sp)
-    # st.dataframe(df)
-    st.write(df.to_html(escape=False), unsafe_allow_html=True)
     return None
 
 
@@ -191,17 +141,20 @@ def recommandation():
                 #Affichage des morceaux recommandés
                 affichage_playlist(nouvelle_playlist,sp)
 
-                # Création de la playlist sur Spotify. On commence par choisir le nom
+                # Création de la playlist sur Spotify
                 ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
 
         elif recommandation_type=="Recommandation par années":
             st.subheader('Recommendation par années')
             st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
+
             st.subheader("Choississez une année cible")
             year = st.text_input('Année choisie', value="1970")
+
             st.subheader("Choississez un delta d'années")
             st.write("Par exemple, si vous sélectionner 1970 précédement et 5 ici, nous vous recommenderons des titres entre 1965 et 1975.")
             delta = st.slider ("Delta d'années", min_value=0, max_value=10,value=5,step = 1)
+
             nouvelle_playlist = recommendation_year(id_to_change,year,delta,sp)
             affichage_playlist_annees(nouvelle_playlist,sp)
             ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
@@ -254,6 +207,8 @@ def apropos():
     st.write('[Dépot Github du projet](https://github.com/EliseLune/SpotData)')
     st.write('[Site des Mines](https://www.minesparis.psl.eu/)')
     return None
+
+#Mise en lien de plusieurs pages et créations de la barre verticale de menu
 app = MultiApp()
 app.add_app("Se déconnecter", accueil)
 app.add_app("Accueil", apres_auth)
@@ -262,5 +217,3 @@ app.add_app("Recommandations", recommandation)
 app.add_app("Glossaire",glossaire)
 app.add_app("A propos",apropos)
 app.run()
-
-

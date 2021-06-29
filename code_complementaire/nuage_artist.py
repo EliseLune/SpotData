@@ -6,6 +6,9 @@ from PIL import Image
 import requests
 # from StringIO import StringIO
 from imageio import imread
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from skimage.morphology import disk
+from skimage.transform import rescale
 
 def artist_dataframe(all_tracks,sp):
     df = pd.DataFrame(columns=['artist_id','name','number of tracks','image'])
@@ -21,10 +24,7 @@ def artist_dataframe(all_tracks,sp):
                 tutu = sp.artist(artist["id"])
                 images = tutu["images"]
                 if len(images) !=0:
-                    df = df.append({'artist_id': artist["id"], 'name' : tutu["name"], 'number of tracks' : 1,'image' : images[0]["url"]}, ignore_index=True)
-                else : 
-                    df = df.append({'artist_id': artist["id"],'name' : tutu["name"], 'number of tracks' : 1,'image' : None}, ignore_index=True)
-                
+                    df = df.append({'artist_id': artist["id"], 'name' : tutu["name"], 'number of tracks' : 1,'image' : images[0]["url"]}, ignore_index=True)                
     return df
 
 
@@ -79,13 +79,29 @@ class C():
             # image = plt.imread(self.df['image'][i])
             circ = plt.Circle(self.x[i,:2],self.x[i,2], fill = False)
             ax.add_patch(circ)
-            label = ax.annotate("{}".format(self.df["name"][i]), xy=self.x[i,:2], ha="center")
-            image = np.asarray(imread(self.df["image"][i]))
-            st.image(image)
+            label = ax.annotate("{}".format(self.df["name"][i]), xy=self.x[i,:2], ha="center", size=2*self.x[i,2])
+            img = imread(self.df["image"][i])
+            
+            n,m,k=img.shape
+            # st.write(n,m,k)
+
+            #On crée une image carrée
+            if n>m:
+                img=img[int(n/2-m/2):int(n/2+m/2)]
+            if n<m:
+                img=img[:,int(m/2-n/2):int(m/2+n/2)]
+            
+            # st.image(np.asarray(img))
+            
+            im = OffsetImage(img)
+            image = np.asarray(img)
+            # ab1 = AnnotationBbox(im, self.x[i,:2])
+            # ax.add_artist(ab1)
 
 def creat_chart(all_tracks,sp):
     # create 10 circles with different radii
     df = artist_dataframe(all_tracks,sp)
+    st.dataframe(df)
     # r = np.random.randint(5,15, size=10)
     r = df['number of tracks'].tolist()
     c = C(r,df)

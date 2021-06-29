@@ -58,6 +58,7 @@ def drop_doubles(playlist):
             res.append(x)
     return res
 
+#Renvoie l'identifiant d'un artiste dont les moyennes des audiofeatures sont similaires à celle de notre morceaux, quand l'artiste de base n'est pas dans la base de données
 def artist_similaire(track,audiofeatures,sp):
     df_artists=pd.read_csv('data/data_by_artist_o.csv')
     audiofeatures = ['danceability','energy','speechiness','acousticness','instrumentalness','valence']
@@ -71,6 +72,7 @@ def artist_similaire(track,audiofeatures,sp):
     df_artists.reset_index(drop=True, inplace=True)
     return df_artists["artists"][0]
 
+#Permet l'affichage de la playlist sous forme d'un dataframe avec les noms des morceauxd, les artistes, les albums et les photos des albums comme index
 def affichage_playlist(nouvelle_playlist,sp):
     st.subheader('Voici les morceaux que vous nous recommendons.')
     names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
@@ -79,9 +81,9 @@ def affichage_playlist(nouvelle_playlist,sp):
                 'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],}, 
                 index = ["<img src={} height='25'>".format(sp.track(trackie)["album"]["images"][0]["url"]) for trackie in nouvelle_playlist])
     st.write(df.to_html(escape=False), unsafe_allow_html=True)
-    return 0
 
-def ajout_playlist_sur_spotify(nouvell_playlist,sp,playlist_to_change):
+#Permet d'ajouter la playlist sur Spotify en choississant le nom à lui donner
+def ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change):
     st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
     nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
     textPlaceholder = st.empty()
@@ -94,6 +96,6 @@ def ajout_playlist_sur_spotify(nouvell_playlist,sp,playlist_to_change):
         #On crée la nouvelle playlist
         new_playlist = sp.user_playlist_create(user_info["id"],nom_playlist, public=False)
         new_playlist_id = new_playlist["id"]
-
+        
         #On ajoute les morceaux recommandés à la nouvelle playlist
         sp.user_playlist_add_tracks(user_info["id"], new_playlist_id, nouvelle_playlist)
