@@ -7,8 +7,6 @@ import requests
 # from StringIO import StringIO
 from imageio import imread
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-# from skimage.morphology import disk
-# from skimage.transform import rescale
 
 def artist_dataframe(all_tracks,sp):
     df = pd.DataFrame(columns=['artist_id','name','number of tracks','image'])

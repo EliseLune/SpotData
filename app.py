@@ -25,21 +25,6 @@ def get_spotipy_ready():
     res=sp.current_user
     return sp
 
-def recup_noms_playlists_user(ident,secret,nombre):
-    client_credentials_manager = SpotifyClientCredentials(client_id=ident, client_secret=secret)
-    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-    playlists = sp.user_playlists(nombre)
-    L=[]
-    while playlists:
-        for i, playlist in enumerate(playlists['items']):
-            tab= playlist['uri'].split(':')
-            L.append(playlist['name'])
-        if playlists['next']:
-            playlists = sp.next(playlists)
-        else:
-            playlists = None
-    return L
-
 def accueil():
     caching.clear_cache()
     st.title('SpotData')
