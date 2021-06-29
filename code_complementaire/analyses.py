@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
+from skimage.io import imread
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -80,15 +81,24 @@ def gen_tags(audio_feat, playlist):
     return playlist2
 
 @st.cache#(suppress_st_warning=True)
-def gen_wind_rose(tabTags):
+def gen_wind_rose(tabTags, img_url, playlist_name):
     """Generate a polar line chart showing the distribution of audio-features of one playlist"""
     ticks_vals = np.array([0, 0.2, 0.4, 0.7, 1])
-    fig = px.line_polar(tabTags,
+    img = imread(img_url)
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        column_widths=[1.5, 1],
+        # horizontal_spacing=0.3,
+        specs=[[{'type':'polar'}, {}]]
+    )
+    fig2 = px.line_polar(tabTags,
                     theta='name',
                     r='avg resized',
                     line_close=True,
                     line_shape='spline',
                     )
+    fig.add_trace(fig2.data[0], row=1, col=1)
     fig.update_layout(
         title = "<b>Diagramme général des audio-features</b>",
         polar = dict(
@@ -102,6 +112,8 @@ def gen_wind_rose(tabTags):
                 range = [0, 1]
             ),
             angularaxis = dict(
+                rotation = 90,
+                direction = 'counterclockwise',
                 linecolor = '#191414',
                 gridcolor = '#a3c1ad'
             )
@@ -114,8 +126,27 @@ def gen_wind_rose(tabTags):
         hovertext=list(tabTags['tag']) + [tabTags.iloc[0]['tag']],
         hoveron = 'points',
         hovertemplate = '%{hovertext}<br>%{text:.2f}',
+        row=1,
+        col=1
     )
-    return fig
+    
+    fig3 = px.imshow(img)
+    fig.add_trace(
+        fig3.data[0],
+        row=1,
+        col=2
+    )
+    fig.update_traces(
+        hovertemplate = playlist_name+"<extra></extra>",
+        # x0 = 1,
+        row=1,
+        col=2
+    )
+    fig['layout']['xaxis']['visible'] = False
+    fig['layout']['yaxis']['visible'] = False
+    fig['layout']['margin']['l'] = 0
+    fig['layout']['margin']['r'] = 0
+    return "", "", fig
 
 @st.cache
 def correlation(dataPL, index):
@@ -165,7 +196,7 @@ def gen_corr_scatter(dataPL, index):
     fig.update_layout(
         showlegend = False
     )
-    return fig
+    return ("", "", fig)
 
 @st.cache#(suppress_st_warning=True)
 def gen_one_hist(dataPL, tabTags, AFname, i_color):
@@ -180,7 +211,7 @@ def gen_one_hist(dataPL, tabTags, AFname, i_color):
             hovertemplate = "<b>Années de sortie</b><br><i>Période</i> : %{x}<br><i>Nbr de pistes</i> : %{y}"
         )
         fig.update_layout(
-            title="Années de sortie",
+            # title="Années de sortie",
             xaxis_title = "Années de sortie",
             yaxis_title = "Nombre de pistes /période de temps"
         )
@@ -211,7 +242,7 @@ def gen_one_hist(dataPL, tabTags, AFname, i_color):
                     hoverlabel_bgcolor = colors[(i_color+1)%len(colors)]
                 )
         fig.update_layout(
-            title = "<b>"+ tabTags.loc[aud_feat, 'name'] + "</b>  -  " + tabTags.loc[aud_feat, 'tag'],
+            # title = "<b>"+ tabTags.loc[aud_feat, 'name'] + "</b>  -  " + tabTags.loc[aud_feat, 'tag'],
             xaxis = dict(
                 title = tabTags.loc[aud_feat, 'name'],
                 range = [0,100] if aud_feat=='popularity' else [0,1]
@@ -230,8 +261,9 @@ def gen_one_hist(dataPL, tabTags, AFname, i_color):
         yaxis = dict(
             gridcolor = '#65737e'
         ),
+        margin_t = 30
     )
-    return fig
+    return "__Années de sortie__" if aud_feat=="années de sortie" else "__"+tabTags.loc[aud_feat, 'name']+"__  -  "+tabTags.loc[aud_feat, 'tag'], "" if aud_feat=='années de sortie' else tabTags.loc[aud_feat, 'description'], fig
 
 @st.cache
 def gen_hists(dataPL, tabTags, liste_feat):
@@ -246,5 +278,9 @@ def gen_hists(dataPL, tabTags, liste_feat):
 
 def display_plotly(list_figs):
     if list_figs[0]!=None:
-        for fig in list_figs:
+        for title, desc, fig in list_figs:
+            if title!="":
+                st.subheader(title)
+            if desc!="":
+                st.write(desc)
             st.plotly_chart(fig)

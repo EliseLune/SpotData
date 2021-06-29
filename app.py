@@ -15,7 +15,7 @@ from spotify_collector.spotify_connector import get_spotipy
 from code_complementaire.extraction_spotipy import *
 from code_complementaire.playlist_soufflee import *
 from code_complementaire.analyses import *
-from code_complementaire.recommendatoin_annees import *
+from code_complementaire.recommendation_annees import *
 from code_complementaire.nuage_artist import *
 
 @st.cache(allow_output_mutation=True)
@@ -73,24 +73,24 @@ def apres_auth():
         st.write("Pays : {}".format(country(user_info["country"])))
 
     #Récupération des playlists ey de leur ID
-    name_playlists, playlists = get_playlists(sp.current_user_playlists()["items"])
+    _, playlists = get_playlists(sp.current_user_playlists()["items"])
     st.subheader('Pour commencer, une vision d\'ensemble de votre musique')
     
     #Affichage des statistiques golbales
-    st.write('  - Nombre de playlists : {}'.format(len(playlists)))
+    st.write('  - _Nombre de playlists_ : {}'.format(len(playlists)))
     all_track = all_tracks(playlists,sp)
-    st.write('  - Nombre de titres enregistrés : {}'.format(len(all_track)))
-    st.write('  - Nombre d\'artistes écoutés : {}'.format(len(all_artists(playlists,sp))))
+    st.write('  - _Nombre de titres enregistrés_ : {}'.format(len(all_track)))
+    st.write('  - _Nombre d\'artistes écoutés_ : {}'.format(len(all_artists(playlists,sp))))
     
     #Affichage des tops artistes
     top_artists = sp.current_user_top_artists(limit=5)
     if top_artists["total"]!=0: #On n'affiche pas les top artistes si l'utilisateur n'en a pas
-        st.write('  - Artistes les plus écoutés : {}'.format(top_artist_to_string(top_artists)))
+        st.write('  - _Artistes les plus écoutés_ : {}'.format(top_artist_to_string(top_artists)))
     
     #Affichage du top track
     top_tracks = sp.current_user_top_tracks(limit=1)
     if top_tracks["total"]!=0:
-        st.write('  - Titre le plus écouté : {}'.format(top_tracks["items"][0]["name"]))
+        st.write('  - _Titre le plus écouté_ : ___{}___, {}'.format(top_tracks["items"][0]["name"], top_tracks["items"][0]["artists"][0]['name']))
     return None
 
 
@@ -105,17 +105,17 @@ def analyse():
     st.subheader("Quelle playlist souhaitez-vous faire analyser ?")
     crtPlaylist=st.selectbox('Vos playlists: ',name_playlists)
     crtId = name_to_id(name_playlists, id_playlists, crtPlaylist)
+    
+    img_url = sp.playlist(crtId)['images'][0]['url']
+    
     dataPL = creat_df_audiofeatures(crtId, sp)
     totTime = dataPL['length'].sum()//1000  # en secondes
     st.write('__Nombre de pistes__ : {}'.format(dataPL.shape[0]))
     st.write('__Durée de la playlist__ : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
     
-    # img = get_playlist_cover_image(crtId)
-    # st.write(img)
-    
     tabAF = create_work()
     tabTags = gen_tags(tabAF, dataPL)
-    display_plotly([gen_wind_rose(tabTags[tabTags['to analyse']])])
+    display_plotly([gen_wind_rose(tabTags[tabTags['to analyse']], img_url, crtPlaylist)])
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
     # display_plotly([gen_corr_scatter(dataPL, tabTags[tabTags['to analyse']].index)])

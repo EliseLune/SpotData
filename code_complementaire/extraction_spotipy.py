@@ -38,6 +38,7 @@ def getTrackFeatures(id,sp):
              features[0]['valence']]
 
 #Créé un dataframe des audiofeatures d'une playlist à partie de son ID
+@st.cache
 def creat_df_audiofeatures(playlist_id,sp):
     ids = getTrackIDs(playlist_id,sp)
     tracks = []
