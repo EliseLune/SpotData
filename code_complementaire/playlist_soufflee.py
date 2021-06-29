@@ -72,7 +72,7 @@ def artist_similaire(track,audiofeatures,sp):
     return df_artists["artists"][0]
 
 def affichage_playlist(nouvelle_playlist,sp):
-    st.subheader('Voici les morceaux que vous nous recommendons.')
+    st.subheader('Voici les morceaux que nous vous recommandons.')
     names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
     df = pd.DataFrame({'Track':names,
                 'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
@@ -81,7 +81,7 @@ def affichage_playlist(nouvelle_playlist,sp):
     st.write(df.to_html(escape=False), unsafe_allow_html=True)
     return 0
 
-def ajout_playlist_sur_spotify(nouvell_playlist,sp,playlist_to_change):
+def ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change):
     st.subheader("Notre proposition vous plaît? Ajouter cette nouvelle playlist sur Spotify !")
     nom_playlist = st.text_input('Nom de ma nouvelle playlist', value="New {}".format(playlist_to_change))
     textPlaceholder = st.empty()
