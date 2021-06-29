@@ -123,14 +123,14 @@ def recommandation():
 
     #Choix de la playlist
     st.subheader('A partir de quelle playlist souhaitez-vous en obtenir une nouvelle?')
-    playlist_to_change=st.selectbox('Vos playlists: ',['<select>']+name_playlists)
-    if playlist_to_change!='<select>': #Une playlist a été selectionnée
+    playlist_to_change=st.selectbox('Vos playlists: ',['Select']+name_playlists)
+    if playlist_to_change!='Select': #Une playlist a été selectionnée
 
         #On récupère l'ID de la playlist à changer
         id_to_change=name_to_id(name_playlists,id_playlists,playlist_to_change)
         
         #Choix du type de recommandation
-        recommandation_type=st.selectbox('Quelle type de recommandation voulez-vous ?',['<select>',"Playlist soufflée", "Recommandation par années"])
+        recommandation_type=st.selectbox('Quelle type de recommandation voulez-vous ?',['Select',"Playlist soufflée", "Recommandation par années"])
         
         #recommandation de playlist soufflée
         if recommandation_type=="Playlist soufflée":
