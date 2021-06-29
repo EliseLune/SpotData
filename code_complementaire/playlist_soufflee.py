@@ -74,7 +74,7 @@ def artist_similaire(track,audiofeatures,sp):
 
 #Permet l'affichage de la playlist sous forme d'un dataframe avec les noms des morceauxd, les artistes, les albums et les photos des albums comme index
 def affichage_playlist(nouvelle_playlist,sp):
-    st.subheader('Voici les morceaux que vous nous recommendons.')
+    st.subheader('Voici les morceaux que nous vous recommandons.')
     names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
     df = pd.DataFrame({'Track':names,
                 'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],

@@ -25,16 +25,31 @@ def get_spotipy_ready():
     res=sp.current_user
     return sp
 
+def recup_noms_playlists_user(ident,secret,nombre):
+    client_credentials_manager = SpotifyClientCredentials(client_id=ident, client_secret=secret)
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    playlists = sp.user_playlists(nombre)
+    L=[]
+    while playlists:
+        for i, playlist in enumerate(playlists['items']):
+            tab= playlist['uri'].split(':')
+            L.append(playlist['name'])
+        if playlists['next']:
+            playlists = sp.next(playlists)
+        else:
+            playlists = None
+    return L
+
 def accueil():
     caching.clear_cache()
     st.title('SpotData')
     st.write('Par J.Delaplace, E.Lei, C.Nothhelfer, P.Vehrlé')
-    st.write('SpotData est une Webapp vous proposant de faire analyser vos playlists Spotify, et de découvrir encore plus de musiques qui vous correspondent.')
-    st.write("Vous allez être redirigé vers une page d'autentification. Une fois cette dernière finie, revenez sur cette page")
+    st.write('SpotData est une WebApp vous proposant de faire analyser vos playlists Spotify, et de découvrir encore plus de musiques qui vous correspondent.')
+    st.write("Vous allez être redirigé vers une page d'autentification. Une fois cette dernière finie, revenez sur cette page.")
     textPlaceholder = st.empty()
     click = textPlaceholder.button("Se connecter à Spotify")
     if click:
-        textPlaceholder.text("Vous êtes connecté. Vous pouvez allez naviguer sur le reste de l'application.")
+        textPlaceholder.text("Vous êtes connecté. Vous pouvez naviguer sur le reste de l'application.")
         sp = get_spotipy_ready()
         res = sp.current_user()
     return None
@@ -87,22 +102,28 @@ def analyse():
     st.title('SpotData')
     st.header('Analyse de vos playlists')
     
+    st.subheader("Quelle playlist souhaitez-vous faire analyser ?")
     crtPlaylist=st.selectbox('Vos playlists: ',name_playlists)
     crtId = name_to_id(name_playlists, id_playlists, crtPlaylist)
     dataPL = creat_df_audiofeatures(crtId, sp)
+    totTime = dataPL['length'].sum()//1000  # en secondes
+    st.write('__Nombre de pistes__ : {}'.format(dataPL.shape[0]))
+    st.write('__Durée de la playlist__ : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
+    
+    # img = get_playlist_cover_image(crtId)
+    # st.write(img)
+    
     tabAF = create_work()
     tabTags = gen_tags(tabAF, dataPL)
-    totTime = dataPL['length'].sum()//1000  # en secondes
-    st.write('Nombre de pistes : {}'.format(dataPL.shape[0]))
-    st.write('Durée de la playlist : {} h {} min {} s'.format(totTime//3600, totTime//60-(totTime//3600)*60, totTime - totTime//3600*3600 - (totTime//60-(totTime//3600)*60)*60))
-    
-    gen_wind_rose(tabTags)
+    display_plotly([gen_wind_rose(tabTags[tabTags['to analyse']])])
     # st.write('(Texte d\'analyse=>Playlist sport/tranquille etc.-pas prioritaire-)')
     
-    a=st.multiselect('Audio-Features',['Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Années de sortie','Speechiness','Valence'])
+    # display_plotly([gen_corr_scatter(dataPL, tabTags[tabTags['to analyse']].index)])
+    
+    a=st.multiselect('Audio-Features',['Années de sortie','Acousticness','Danceability','Energy','Instrumentalness','Liveness','Popularity','Speechiness','Valence'])
     if crtPlaylist!='Select' and a!=[]:
         # test_plotly('df_example_01-Copy1.csv',a)
-        gen_hists(dataPL, a, tabTags)
+        display_plotly(gen_hists(dataPL, tabTags, a))
     
     return None
 
@@ -126,12 +147,12 @@ def recommandation():
         #Choix du type de recommandation
         recommandation_type=st.selectbox('Quelle type de recommandation voulez-vous ?',['<select>',"Playlist soufflée", "Recommandation par années"])
         
-        #recommendation de playlist soufflée
+        #recommandation de playlist soufflée
         if recommandation_type=="Playlist soufflée":
             st.subheader('Playlist soufflée')
-            st.write("Pour chaque morceau de la playlist, ce type de recommendation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
+            st.write("Pour chaque morceau de la playlist, ce type de recommandation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
             st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelle playlist")
-            st.write("N'en choissiez pas trop, la recommendation serait bien plus compliquée !")
+            st.write("N'en choissiez pas trop, la recommandation serait bien plus compliquée !")
             audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','valence'])
             if audiofeatures_chosen!=[]: #Des audiofeatures ont été choisits
 
@@ -145,14 +166,14 @@ def recommandation():
                 ajout_playlist_sur_spotify(nouvelle_playlist,sp,playlist_to_change)
 
         elif recommandation_type=="Recommandation par années":
-            st.subheader('Recommendation par années')
+            st.subheader('Recommandation par années')
             st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
 
             st.subheader("Choississez une année cible")
             year = st.text_input('Année choisie', value="1970")
 
             st.subheader("Choississez un delta d'années")
-            st.write("Par exemple, si vous sélectionner 1970 précédement et 5 ici, nous vous recommenderons des titres entre 1965 et 1975.")
+            st.write("Par exemple, si vous sélectionner 1970 précédement et 5 ici, nous vous recommanderons des titres entre 1965 et 1975.")
             delta = st.slider ("Delta d'années", min_value=0, max_value=10,value=5,step = 1)
 
             nouvelle_playlist = recommendation_year(id_to_change,year,delta,sp)
@@ -161,8 +182,8 @@ def recommandation():
         
         else:
             st.subheader('Playlist soufflée')
-            st.write("Pour chaque morceau de la playlist, ce type de recommendation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
-            st.subheader('Recommendation par années')
+            st.write("Pour chaque morceau de la playlist, ce type de recommandation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
+            st.subheader('Recommandation par années')
             st.write("Chaque morceau de la playlist sera remplacé par un morceau paru autour de la date selectionnée avec des audiofeatures similaires")
     return None
 
@@ -207,6 +228,8 @@ def apropos():
     st.write('[Dépot Github du projet](https://github.com/EliseLune/SpotData)')
     st.write('[Site des Mines](https://www.minesparis.psl.eu/)')
     return None
+
+st.set_page_config(page_title='SpotData')
 
 #Mise en lien de plusieurs pages et créations de la barre verticale de menu
 app = MultiApp()
