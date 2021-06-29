@@ -64,10 +64,10 @@ def release_date_to_year(rd):
 def affichage_playlist_annees(nouvelle_playlist,sp):
     st.subheader('Voici les morceaux que nous vous recommandons.')
     names = [sp.track(trackie)["name"] for trackie in nouvelle_playlist]
-    df = pd.DataFrame({'Track':names,
-                'Artist':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
+    df = pd.DataFrame({'Morceau':names,
+                'Artiste':[get_artists(trackie,sp) for trackie in nouvelle_playlist],
                 'Album':[sp.track(trackie)["album"]["name"] for trackie in nouvelle_playlist],
-                'Release Date':[sp.track(trackie)['album']['release_date'] for trackie in nouvelle_playlist],},
+                'Date de sortie':[sp.track(trackie)['album']['release_date'] for trackie in nouvelle_playlist],},
                 index = ["<img src={} height='25'>".format(sp.track(trackie)["album"]["images"][0]["url"]) for trackie in nouvelle_playlist])
     n=len(df["Track"])
     st.write(df.to_html(escape=False), unsafe_allow_html=True)
