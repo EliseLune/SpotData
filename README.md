@@ -14,8 +14,3 @@ streamlit run app.py
 ```
 
 Vous allez être renvoyer sur une page dans votre navigateur et vous n'avez plus qu'à explorer l'application !
-
-## Visiter le site
-
-Vous pouvez aussi simplement utiliser l'application sur le site web : 
-
