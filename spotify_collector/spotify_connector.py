@@ -28,7 +28,7 @@ def get_spotipy(scope, client_id, client_secret, redirect_uri):
     return spotipy.Spotify(auth_manager=SpotifyOAuth(
         client_id=client_id,
         client_secret=client_secret,
-        # redirect_uri=redirect_uri,
+        redirect_uri=redirect_uri,
         scope=scope,
         show_dialog=True,
         open_browser=True,
