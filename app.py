@@ -70,12 +70,12 @@ def apres_auth():
     #Affichage des tops artistes
     top_artists = sp.current_user_top_artists(limit=5)
     if top_artists["total"]!=0: #On n'affiche pas les top artistes si l'utilisateur n'en a pas
-        st.write('  - _Artistes les plus écoutés_ : {}'.format(top_artist_to_string(top_artists)))
+        st.write('  - _Artistes les plus écoutés_dernièrement : {}'.format(top_artist_to_string(top_artists)))
     
     #Affichage du top track
     top_tracks = sp.current_user_top_tracks(limit=1)
     if top_tracks["total"]!=0:
-        st.write('  - _Titre le plus écouté_ : ___{}___ ({})'.format(top_tracks["items"][0]["name"], top_tracks["items"][0]["artists"][0]['name']))
+        st.write('  - _Titre le plus écouté_dernièrement : ___{}___ ({})'.format(top_tracks["items"][0]["name"], top_tracks["items"][0]["artists"][0]['name']))
     return None
 
 
