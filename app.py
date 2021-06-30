@@ -137,7 +137,7 @@ def recommandation():
             st.subheader('Playlist soufflée')
             st.write("Pour chaque morceau de la playlist, ce type de recommandation va chercher un autre morceau avec le même artiste et certaines audiofeatures (choisies par l'utilisateur) similaires.")
             st.subheader("Choississez des audiofeatures à garder similaires dans la nouvelle playlist")
-            st.write("N'en choissiez pas trop, la recommandation serait bien plus compliquée !")
+            st.write("N'en choisissez pas trop, la recommandation serait bien plus compliquée ! (et nous serions obligés de vous créer une playlist avec moins de musiques ...)")
             audiofeatures_chosen=st.multiselect('Audio-Features',['danceability','energy','speechiness','acousticness','instrumentalness','popularity','valence'])
             if audiofeatures_chosen!=[]: #Des audiofeatures ont été choisits
 

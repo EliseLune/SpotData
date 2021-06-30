@@ -21,6 +21,7 @@ def recommandation_souflee(playlist_id, audiofeatures,sp):
         playlist_cible.drop(playlist_cible.loc[playlist_cible['id']==source['id'][i]].index, inplace=True)
 
     nouvelle_playlist = [] #Liste des ID recommandés
+    delta = [0.1, 0.15, 0.2] #Les différents range à tester
     for i in range(len(playlist)):
         artist = source["artist"][i] #artiste cible
 
@@ -28,21 +29,35 @@ def recommandation_souflee(playlist_id, audiofeatures,sp):
         df = all_tracks_of_one_artist(playlist_cible,artist)
 
         #Pour chaque audiofeature selectioné, on ne garde dans df que des morceaux similaires 
-        for j,audio in enumerate(audiofeatures):
-                df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] < playlist[i][j+1] +0.1)]
-        
-        a,b=df.shape
-        if a==0:#s'il n'y a aucun morceau qui correspond
-            other_artist = artist_similaire(source.iloc[i],audiofeatures,sp)
-            df = all_tracks_of_one_artist(playlist_cible,other_artist)
+        i_delta = 0
+        found = False #devient True lorsque l'on trouve au moins une chanson
+        while i_delta<len(delta) and not(found):
             for j,audio in enumerate(audiofeatures):
-                df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] < playlist[i][j+1] +0.1)]
+                    df = df[(df[audio] > playlist[i][j+1] -delta[i_delta]) & (df[audio] < playlist[i][j+1] +delta[i_delta])]
+            a = df.shape[0]
+            found = a>0
+            i_delta += 1
+        if a==0: #s'il n'y a aucun morceau qui correspond
+            other_artists = artist_similaire(source.iloc[i],audiofeatures,sp)
+            for other_artist in other_artists:
+                df = all_tracks_of_one_artist(playlist_cible,other_artist)
+                i_delta = 0
+                found = False
+                while i_delta < len(delta) and not(found):
+                    for j,audio in enumerate(audiofeatures):
+                        df = df[(df[audio] > playlist[i][j+1] -0.1) & (df[audio] < playlist[i][j+1] +0.1)]
+                    a = df.shape[0]
+                    found = a>0
+                    i_delta += 1
+                if a>0 : break
         
-        #On reset les indices de df
-        df.reset_index(drop=True, inplace=True)
+        if a>0 :
+            #On reset les indices de df
+            df.reset_index(drop=True, inplace=True)
 
-        nouvelle_playlist.append(df["id"][0])
-        playlist_cible.drop(playlist_cible.loc[playlist_cible['id']==df["id"][0]].index, inplace=True)
+            nouvelle_musique = df.sample().reset_index(drop=True)
+            nouvelle_playlist.append(nouvelle_musique["id"][0])
+            playlist_cible.drop(playlist_cible.loc[playlist_cible['id']==nouvelle_musique['id'][0]].index, inplace=True)
     nouvelle_playlist = drop_doubles(nouvelle_playlist)
     return nouvelle_playlist
 
@@ -61,16 +76,17 @@ def drop_doubles(playlist):
 #Renvoie l'identifiant d'un artiste dont les moyennes des audiofeatures sont similaires à celle de notre morceaux, quand l'artiste de base n'est pas dans la base de données
 def artist_similaire(track,audiofeatures,sp):
     df_artists=pd.read_csv('data/data_by_artist_o.csv')
-    audiofeatures = ['danceability','energy','speechiness','acousticness','instrumentalness','valence']
+    # audiofeatures = ['danceability','energy','speechiness','acousticness','instrumentalness','valence']
     for audio in audiofeatures:
         df = df_artists[(df_artists[audio] > track[audio] -0.05) & (df_artists[audio] < track[audio] +0.05)]
-        a,b = df.shape
+        a = df.shape[0]
         if a==0:
-            break
+            continue
         else:
             df_artists=df
-    df_artists.reset_index(drop=True, inplace=True)
-    return df_artists["artists"][0]
+            break
+    df_artists = df_artists.sample(frac=1).reset_index(drop=True)
+    return df_artists.head()["artists"]
 
 #Permet l'affichage de la playlist sous forme d'un dataframe avec les noms des morceauxd, les artistes, les albums et les photos des albums comme index
 def affichage_playlist(nouvelle_playlist,sp):
