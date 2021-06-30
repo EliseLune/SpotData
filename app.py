@@ -53,9 +53,9 @@ def apres_auth():
     if user_info["images"]!=[]: #photo
         st.image(user_info["images"][0]["url"])
     if user_info["email"]!=[]: #email
-        st.write("E-mail : {}".format(user_info["email"]))
+        st.write("_E-mail_ : {}".format(user_info["email"]))
     if user_info["country"]!=[]: #pays
-        st.write("Pays : {}".format(country(user_info["country"])))
+        st.write("_Pays_ : {}".format(country(user_info["country"])))
 
     #Récupération des playlists ey de leur ID
     _, playlists = get_playlists(sp.current_user_playlists()["items"])

@@ -13,7 +13,7 @@ def recommendation_year(id_to_change,year,delta,sp):
     #source est le dataframe des audiofeatures de la playlist pour faire la recommandation
     source = creat_df_audiofeatures(id_to_change,sp)
     
-    audiofeatures = ['valence','danceability','energy','instrumentalness','speechiness','acousticness'  ]
+    audiofeatures = ['valence','danceability','energy','instrumentalness','speechiness','acousticness']
 
     playlist = [] #liste avec les artistes et les audiofeatures à changer
     for i in range (len(source)) : #pour chaque morceau de la playlist initiale
