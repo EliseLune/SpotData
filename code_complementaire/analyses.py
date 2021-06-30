@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
-import skimage
 from skimage.io import imread
 import plotly.express as px
 import plotly.graph_objects as go
