@@ -75,7 +75,7 @@ def apres_auth():
     #Affichage du top track
     top_tracks = sp.current_user_top_tracks(limit=1)
     if top_tracks["total"]!=0:
-        st.write('  - _Titre le plus écouté_ : ___{}___ ({})'.format(top_tracks["items"][0]["name"], top_tracks["items"][0]["artists"][0]['name']))
+        st.write('  - _Titre le plus écouté_ : {} ({})'.format(top_tracks["items"][0]["name"], top_tracks["items"][0]["artists"][0]['name']))
     return None
 
 
@@ -158,7 +158,7 @@ def recommandation():
             year = st.text_input('Année choisie', value="1970")
 
             st.subheader("Choississez un delta d'années")
-            st.write("Par exemple, si vous sélectionner 1970 précédement et 5 ici, nous vous recommanderons des titres entre 1965 et 1975.")
+            st.write("Par exemple, si vous sélectionnez 1970 précédement et 5 ici, nous vous recommanderons des titres entre 1965 et 1975.")
             delta = st.slider ("Delta d'années", min_value=0, max_value=10,value=5,step = 1)
 
             nouvelle_playlist = recommendation_year(id_to_change,year,delta,sp)
